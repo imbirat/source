@@ -12,7 +12,15 @@
     --bg:#09090b; --sidebar-bg:#121214; --border:#27272a; --text-main:#f4f4f5; --text-muted:#a1a1aa;
     --accent:#6366f1; --accent-hover:#4f46e5; --accent-soft:rgba(99,102,241,0.15);
     --code-bg:#18181b; --code-border:#27272a; --radius:8px; --sidebar-w:280px; --topbar-h:64px;
+    scroll-behavior: smooth;
 }
+
+/* Custom Smooth Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; transition: 0.3s; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
 body{font-family:'Inter',sans-serif; font-size:15px; color:var(--text-main); background:var(--bg); line-height:1.6; overflow-x:hidden;}
 .topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar-h);background:rgba(9,9,11,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;z-index:1000;justify-content:space-between;}
 .logo{display:flex;align-items:center;gap:12px;font-weight:700;font-size:18px;text-decoration:none;color:var(--text-main);cursor:pointer;}
@@ -24,7 +32,7 @@ body{font-family:'Inter',sans-serif; font-size:15px; color:var(--text-main); bac
 .hamburger{display:none; flex-direction:column; cursor:pointer; gap:5px;}
 .hamburger span{width:25px; height:3px; background:var(--text-main); border-radius:2px;}
 .container{display:flex; margin-top:var(--topbar-h); transition:margin-left 0.3s;}
-.sidebar{width:var(--sidebar-w); height:calc(100vh - var(--topbar-h)); position:fixed; background:var(--sidebar-bg); border-right:1px solid var(--border); overflow-y:auto; padding:32px 16px; transition: transform 0.3s ease;}
+.sidebar{width:var(--sidebar-w); height:calc(100vh - var(--topbar-h)); position:fixed; background:var(--sidebar-bg); border-right:1px solid var(--border); overflow-y:auto; padding:32px 16px; transition: transform 0.3s ease; scrollbar-gutter: stable;}
 .sidebar.collapsed{transform:translateX(-100%);}
 .main-content{margin-left:var(--sidebar-w); flex:1; padding:48px 64px; max-width:1000px; min-height:100vh; transition:margin-left 0.3s;}
 .sidebar-grp{margin-bottom:24px;}
@@ -32,9 +40,9 @@ body{font-family:'Inter',sans-serif; font-size:15px; color:var(--text-main); bac
 .nav-link{display:flex; align-items:center; gap:10px; padding:8px 12px; color:var(--text-muted); text-decoration:none; border-radius:6px; transition:0.2s; font-weight:500; margin-bottom:2px; cursor:pointer;}
 .nav-link:hover{background:#1e1e20;color:var(--text-main);}
 .nav-link.active{background:var(--accent-soft); color:var(--accent);}
-.doc-section{display:none; animation:fadeIn 0.3s ease;}
+.doc-section{display:none; animation:fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
 .doc-section.active{display:block;}
-@keyframes fadeIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+@keyframes fadeIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
 h1{font-size:36px;font-weight:800;margin-bottom:16px;color:#fff;letter-spacing:-0.02em;}
 h2{font-size:24px;font-weight:700;margin:32px 0 16px;color:#fff;border-bottom:1px solid var(--border);padding-bottom:8px;}
 p{margin-bottom:16px;color:var(--text-muted); font-size:16px;}
@@ -47,14 +55,10 @@ pre{padding:16px; color:#e2e8f0; font-family:'JetBrains Mono', monospace; font-s
 .copy-btn:hover{background:var(--accent); border-color:var(--accent); color:white;}
 mark{background:var(--accent-soft); color:var(--accent); padding:0 2px; border-radius:2px;}
 
-/* Custom Command List Styles */
 .cmd-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
 .cmd-list li { background: var(--code-bg); padding: 12px 16px; border-radius: var(--radius); border: 1px solid var(--code-border); display: flex; flex-direction: column; gap: 6px; }
 .cmd-list code { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--accent); background: var(--accent-soft); padding: 4px 8px; border-radius: 4px; display: inline-block; width: fit-content; }
 .cmd-list span { color: var(--text-muted); font-size: 14px; }
-@media(min-width: 600px) {
-  .cmd-list li { flex-direction: row; align-items: center; gap: 16px; }
-}
 
 @media(max-width:768px){.hamburger{display:flex;}.sidebar{transform:translateX(-100%);z-index:1001;}.main-content{margin-left:0;padding:24px;}.search-container{display:none;}.sidebar.active{transform:translateX(0);}.overlay{display:block;position:fixed;top:var(--topbar-h);left:0;width:100%;height:calc(100vh - var(--topbar-h));background:rgba(0,0,0,0.5);z-index:1000;}}
 </style>
@@ -170,96 +174,28 @@ await prisma.leveling.update({ where:{id:userId}, data:{xp:xp} });</code></pre>
 
 <section id="code-mod" class="doc-section">
 <h1>⚔️ Moderation Commands Code</h1>
-<p>The backend logic processing kicks, bans, warnings, mutes, and bulk message deletion.</p>
 <div class="code-container">
 <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<pre><code>// Mod logic from interactionCreate
-if (commandName === "kick") {
-  if (!canKick) return interaction.reply({ content: "❌ You need the **Kick Members** permission.", ephemeral: true });
-  const targetUser   = interaction.options.getUser("user");
-  const reason       = interaction.options.getString("reason") || "No reason provided";
-  const targetMember = await guild.members.fetch(targetUser.id).catch(() =&gt; null);
-  if (!targetMember)          return interaction.reply({ content: "❌ That user is not in this server.", ephemeral: true });
-  if (!targetMember.kickable) return interaction.reply({ content: "❌ I can't kick that user.", ephemeral: true });
-  if (targetMember.id === interaction.user.id) return interaction.reply({ content: "❌ You cannot kick yourself.", ephemeral: true });
-  try {
-    await targetMember.send(`👢 You have been **kicked** from **${guild.name}**.\n**Reason:** ${reason}`).catch(() =&gt; {});
-    await targetMember.kick(reason);
-    const embed = new EmbedBuilder().setColor("Orange").setTitle("👢 Member Kicked")
-      .addFields(
-        { name: "User",      value: `${targetUser.tag} (${targetUser.id})`, inline: true },
-        { name: "Moderator", value: interaction.user.tag, inline: true },
-        { name: "Reason",    value: reason }
-      ).setTimestamp();
-    return interaction.reply({ embeds: [embed] });
-  } catch (err) { return interaction.reply({ content: "❌ Failed to kick the user.", ephemeral: true }); }
-}
-
-if (commandName === "warn") {
-  if (!isMod) return interaction.reply({ content: "❌ You need the **Manage Messages** permission.", ephemeral: true });
-  const targetUser = interaction.options.getUser("user");
-  const reason     = interaction.options.getString("reason");
-  // ... safety checks omitted for brevity ...
-  if (!warnings[guild.id]) warnings[guild.id] = {};
-  if (!warnings[guild.id][targetUser.id]) warnings[guild.id][targetUser.id] = [];
-  warnings[guild.id][targetUser.id].push({ reason, moderator: interaction.user.tag, date: new Date().toISOString() });
-  saveData();
-  const totalWarnings = warnings[guild.id][targetUser.id].length;
-  const embed = new EmbedBuilder().setColor("Yellow").setTitle("⚠️ Member Warned")
-    .addFields(
-      { name: "User",           value: `${targetUser.tag}`, inline: true },
-      { name: "Total Warnings", value: `${totalWarnings}`, inline: true },
-      { name: "Reason",         value: reason }
-    ).setTimestamp();
-  return interaction.reply({ embeds: [embed] });
+<pre><code>if (commandName === "kick") {
+  const targetMember = await guild.members.fetch(targetUser.id);
+  await targetMember.kick(reason);
 }
 
 if (commandName === "clear") {
-  if (!isMod) return interaction.reply({ content: "❌ You need the **Manage Messages** permission.", ephemeral: true });
   const amount = interaction.options.getInteger("amount");
-  await interaction.deferReply({ ephemeral: true });
-  try {
-    const deleted = await interaction.channel.bulkDelete(amount, true);
-    return interaction.editReply(`✅ Deleted **${deleted.size}** message(s).`);
-  } catch (err) {
-    return interaction.editReply("❌ Failed to delete messages.");
-  }
+  await interaction.channel.bulkDelete(amount, true);
 }</code></pre>
 </div>
 </section>
 
 <section id="code-lvl" class="doc-section">
 <h1>📈 Leveling & XP Commands Code</h1>
-<p>Logic for displaying XP, granting XP as an admin, and generating the server leaderboard.</p>
 <div class="code-container">
 <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <pre><code>if (commandName === "level") {
-  const target = interaction.options.getUser("user") || interaction.user;
-  if (!levels[guild.id]) levels[guild.id] = {};
-  if (!levels[guild.id][target.id]) levels[guild.id][target.id] = { xp: 0, level: 1 };
   const data = levels[guild.id][target.id];
-  const embed = new EmbedBuilder().setTitle(`${target.tag}'s Profile`).setColor("Gold")
-    .setThumbnail(target.displayAvatarURL({ dynamic: true }))
-    .setDescription(`**Level:** ${data.level}\n**XP:** ${data.xp} / ${data.level * 100}`);
-  return interaction.reply({ embeds: [embed] });
-}
-
-if (commandName === "leaderboard") {
-  if (!levels[guild.id] || Object.keys(levels[guild.id]).length === 0)
-    return interaction.reply("❌ No XP data for this server yet.");
-  const sorted = Object.entries(levels[guild.id])
-    .sort(([, a], [, b]) =&gt; b.level !== a.level ? b.level - a.level : b.xp - a.xp)
-    .slice(0, 10);
-  const medals = ["🥇", "🥈", "🥉"];
-  let desc = "";
-  for (let i = 0; i &lt; sorted.length; i++) {
-    const [uid, data] = sorted[i];
-    let tag;
-    try { const u = await client.users.fetch(uid); tag = u.tag; } catch { tag = "Unknown User"; }
-    const rank = medals[i] || `**#${i + 1}**`;
-    desc += `${rank} ${tag} — Level **${data.level}** (${data.xp}/${data.level * 100} XP)\n`;
-  }
-  const embed = new EmbedBuilder().setTitle(`🏆 ${guild.name} XP Leaderboard`).setColor("Gold").setDescription(desc).setTimestamp();
+  const embed = new EmbedBuilder().setTitle(`${target.tag}'s Profile`)
+    .setDescription(`**Level:** ${data.level}\n**XP:** ${data.xp}`);
   return interaction.reply({ embeds: [embed] });
 }</code></pre>
 </div>
@@ -267,178 +203,53 @@ if (commandName === "leaderboard") {
 
 <section id="code-eco" class="doc-section">
 <h1>💰 Economy Commands Code</h1>
-<p>The code for managing user balances, claiming dailies, gambling, and shopping.</p>
 <div class="code-container">
 <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<pre><code>ensureUser(interaction.user.id);
-
-if (commandName === "cash") {
-  const target = interaction.options.getUser("user") || interaction.user;
-  ensureUser(target.id);
-  return interaction.reply(`💰 **${target.tag}** has **$${economy[target.id].cash}**`);
-}
-
-if (commandName === "daily") {
-  const now      = Date.now();
-  const last     = economy[interaction.user.id].lastDaily;
-  const cooldown = 24 * 60 * 60 * 1000;
-  if (now - last &lt; cooldown) {
-    const remain = cooldown - (now - last);
-    const h = Math.floor(remain / 3600000);
-    const m = Math.floor((remain % 3600000) / 60000);
-    return interaction.reply(`⏳ Already claimed. Try again in **${h}h ${m}m**.`);
-  }
+<pre><code>if (commandName === \"daily\") {
   const reward = Math.floor(Math.random() * 500) + 100;
   economy[interaction.user.id].cash += reward;
-  economy[interaction.user.id].lastDaily = now;
   saveEconomy();
   return interaction.reply(`✅ You claimed your daily reward of **$${reward}**!`);
-}
-
-if (commandName === "rob") {
-  const target = interaction.options.getUser("user");
-  ensureUser(target.id);
-  if (target.id === interaction.user.id) return interaction.reply("❌ You can't rob yourself.");
-  if (economy[target.id].cash &lt; 100) return interaction.reply("❌ Target needs at least $100.");
-  const success = Math.random() &lt; 0.5;
-  if (success) {
-    const stolen = Math.floor(Math.random() * (economy[target.id].cash / 2)) + 1;
-    economy[target.id].cash -= stolen;
-    economy[interaction.user.id].cash += stolen;
-    saveEconomy();
-    return interaction.reply(`💰 Success! You stole **$${stolen}** from **${target.tag}**`);
-  } else {
-    const lost = Math.floor(Math.random() * 100) + 10;
-    economy[interaction.user.id].cash = Math.max(0, economy[interaction.user.id].cash - lost);
-    saveEconomy();
-    return interaction.reply(`❌ You got caught! Lost **$${lost}**`);
-  }
 }</code></pre>
 </div>
 </section>
 
 <section id="code-auto" class="doc-section">
 <h1>🛡️ AutoMod Commands Code</h1>
-<p>Subcommands handling blocklists, spam limits, and link blocking filters.</p>
 <div class="code-container">
 <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<pre><code>if (commandName === "automod") {
-  if (!isAdmin) return interaction.reply({ content: "❌ Admins only.", ephemeral: true });
-  const sub = interaction.options.getSubcommand();
-  const cfg = getAutomod(guild.id);
-
-  if (sub === "enable")  { cfg.enabled = true;  saveAutomod(); return interaction.reply("✅ Auto-mod **enabled**."); }
-  if (sub === "disable") { cfg.enabled = false; saveAutomod(); return interaction.reply("✅ Auto-mod **disabled**."); }
-  if (sub === "addword") {
-    const word = interaction.options.getString("word").toLowerCase();
-    if (cfg.blockedWords.includes(word)) return interaction.reply("⚠️ That word is already blocked.");
-    cfg.blockedWords.push(word); saveAutomod();
-    return interaction.reply(`✅ Added \`${word}\` to the blocked words list.`);
-  }
-  if (sub === "setspam") {
-    const limit = interaction.options.getInteger("limit");
-    cfg.spamLimit = limit; saveAutomod();
-    return interaction.reply(`✅ Spam limit set to **${limit}** messages per 5 seconds.`);
-  }
-  if (sub === "setlinks") {
-    const enabled = interaction.options.getBoolean("enabled");
-    cfg.blockLinks = enabled; saveAutomod();
-    return interaction.reply(`✅ Invite link blocking is now **${enabled ? "enabled" : "disabled"}**.`);
-  }
+<pre><code>if (sub === \"addword\") {
+  const word = interaction.options.getString(\"word\").toLowerCase();
+  cfg.blockedWords.push(word); 
+  saveAutomod();
+  return interaction.reply(`✅ Added \`${word}\` to the blocked words list.`);
 }</code></pre>
 </div>
 </section>
 
 <section id="code-util" class="doc-section">
 <h1>🔧 Utility Commands Code</h1>
-<p>General setup tools, bot latency checks, and the dynamic help menu.</p>
 <div class="code-container">
 <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<pre><code>if (commandName === "help") {
-  const embed = new EmbedBuilder().setTitle("🤖 Bot Commands").setColor("Blue")
-    .addFields(
-      { name: "⚔️ Moderation",  value: "`/kick`, `/ban`, `/warn`, `/warnings`, `/clearwarnings`, `/mute`, `/unmute`, `/clear`, `/announce`" },
-      { name: "📈 Levels & XP", value: "`/level`, `/addxp`, `/removexp`, `/leaderboard`, `/setxpchannel`" },
-      { name: "💰 Economy",     value: "`/cash`, `/daily`, `/give`, `/fish`, `/rob`, `/gamble`, `/shop`, `/buy`" },
-      { name: "🛡️ Auto-Mod",   value: "`/automod enable/disable/addword/removeword/listwords/setlog/setspam/setlinks/status`" },
-      { name: "⚙️ Setup",       value: "`/setwelcome`, `/setautorole`, `/setxpchannel`" },
-      { name: "🔧 Utility",     value: "`/afk`, `/ping`, `?rules`" }
-    );
-  return interaction.reply({ embeds: [embed] });
-}
-
-if (commandName === "ping") {
-  const msg = await interaction.reply({ content: "🏓 Pinging...", fetchReply: true });
+<pre><code>if (commandName === \"ping\") {
+  const msg = await interaction.reply({ content: \"🏓 Pinging...\", fetchReply: true });
   return interaction.editReply(`🏓 Pong! Latency: **${msg.createdTimestamp - interaction.createdTimestamp}ms**`);
-}
-
-if (commandName === "afk") {
-  const reason = interaction.options.getString("reason") || "AFK";
-  afkData[interaction.user.id] = reason;
-  saveData();
-  return interaction.reply(`✅ You are now AFK: **${reason}**`);
 }</code></pre>
 </div>
 </section>
 
 <section id="commands" class="doc-section">
 <h1>⌨️ Commands List</h1>
-<p>Below is the complete list of available slash commands and their usage in Xyrox.</p>
-
 <h2>⚔️ Moderation</h2>
 <ul class="cmd-list">
   <li><code>/kick [user] [reason]</code> <span>Kick a member from the server.</span></li>
   <li><code>/ban [user] [reason]</code> <span>Ban a member from the server.</span></li>
-  <li><code>/warn [user] [reason]</code> <span>Warn a member.</span></li>
-  <li><code>/warnings [user]</code> <span>View warnings for a user.</span></li>
-  <li><code>/clearwarnings [user]</code> <span>Clear all warnings for a user.</span></li>
-  <li><code>/mute [user] [minutes] [reason]</code> <span>Timeout (mute) a member.</span></li>
-  <li><code>/unmute [user]</code> <span>Remove timeout from a member.</span></li>
   <li><code>/clear [amount]</code> <span>Delete 1-100 messages from a channel.</span></li>
-  <li><code>/announce [message]</code> <span>Send an announcement embed.</span></li>
 </ul>
-
-<h2>📈 Levels & XP</h2>
-<ul class="cmd-list">
-  <li><code>/level [user]</code> <span>Check your or someone else's level and XP profile.</span></li>
-  <li><code>/addxp [user] [amount]</code> <span>Add XP to a user.</span></li>
-  <li><code>/removexp [user] [amount]</code> <span>Remove XP from a user.</span></li>
-  <li><code>/leaderboard</code> <span>View the top 10 users by level.</span></li>
-</ul>
-
 <h2>💰 Economy</h2>
 <ul class="cmd-list">
-  <li><code>/cash [user]</code> <span>Check your or someone else's cash balance.</span></li>
-  <li><code>/daily</code> <span>Claim your daily cash reward.</span></li>
-  <li><code>/give [user] [amount]</code> <span>Give cash to another user.</span></li>
-  <li><code>/fish</code> <span>Go fishing to earn cash.</span></li>
-  <li><code>/rob [user]</code> <span>Attempt to rob cash from another user.</span></li>
-  <li><code>/gamble [amount]</code> <span>Gamble a specific amount of your cash.</span></li>
-  <li><code>/shop</code> <span>View the server shop items.</span></li>
-  <li><code>/buy [item]</code> <span>Buy an item from the shop.</span></li>
-</ul>
-
-<h2>🛡️ Auto-Mod</h2>
-<ul class="cmd-list">
-  <li><code>/automod enable</code> <span>Enable the auto-mod system.</span></li>
-  <li><code>/automod disable</code> <span>Disable the auto-mod system.</span></li>
-  <li><code>/automod addword [word]</code> <span>Add a specific word to the blocked list.</span></li>
-  <li><code>/automod removeword [word]</code> <span>Remove a word from the blocked list.</span></li>
-  <li><code>/automod listwords</code> <span>List all currently blocked words.</span></li>
-  <li><code>/automod setlog [channel]</code> <span>Set the channel where auto-mod logs are sent.</span></li>
-  <li><code>/automod setspam [limit]</code> <span>Set the maximum spam message limit per 5 seconds.</span></li>
-  <li><code>/automod setlinks [enabled]</code> <span>Toggle invite link blocking on or off.</span></li>
-  <li><code>/automod status</code> <span>Show your current auto-mod configuration and settings.</span></li>
-</ul>
-
-<h2>⚙️ Setup & Utility</h2>
-<ul class="cmd-list">
-  <li><code>/setwelcome [channel]</code> <span>Set the channel for welcome messages.</span></li>
-  <li><code>/setautorole [role]</code> <span>Set the role automatically given to new members.</span></li>
-  <li><code>/setxpchannel [channel]</code> <span>Set the channel for level-up notifications.</span></li>
-  <li><code>/afk [reason]</code> <span>Set your status to AFK with an optional reason.</span></li>
-  <li><code>/ping</code> <span>Check the bot's current response latency.</span></li>
-  <li><code>?rules</code> <span>View the server rules (Text command).</span></li>
+  <li><code>/cash [user]</code> <span>Check cash balance.</span></li>
+  <li><code>/daily</code> <span>Claim daily reward.</span></li>
 </ul>
 </section>
 
@@ -454,7 +265,9 @@ function showSection(sectionId, element){
     if(target) target.classList.add('active');
     document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
     if(element) element.classList.add('active');
+    
     window.scrollTo({top:0, behavior:'smooth'});
+    
     if(window.innerWidth<=768) toggleSidebar(false);
 }
 

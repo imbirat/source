@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xyrox — Command Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:       #08080f;
+  --surface:  #0e0e1a;
+  --surface2: #13131f;
+  --border:   rgba(255,255,255,0.06);
+  --border2:  rgba(255,255,255,0.1);
+  --text:     #e8e8f0;
+  --muted:    #6060a0;
+  --dim:      #3a3a60;
+  --indigo:   #7c6cff;
+  --violet:   #a78bfa;
+  --mod:      #fb7185;
+  --xp:       #fbbf24;
+  --eco:      #34d399;
+  --automod:  #a78bfa;
+  --setup:    #38bdf8;
+  --util:     #7c6cff;
+  --font-head: 'Syne', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --font-body: 'DM Sans', sans-serif;
+  --sidebar-w: 256px;
+  --r: 14px;
+}
+
+html { scroll-behavior:smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% -10%, rgba(124,108,255,.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 95% 100%, rgba(34,211,238,.07) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(167,139,250,.04) 0%, transparent 70%);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ── SIDEBAR ─────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  height: 100vh;
+  position: fixed; top:0; left:0;
+  background: rgba(14,14,26,.85);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border);
+  padding: 28px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 100;
+  overflow-y: auto;
+}
+.sidebar::-webkit-scrollbar { display:none; }
+
+.logo {
+  display:flex; align-items:center; gap:10px;
+  padding:0 8px; margin-bottom:32px;
+}
+.logo-mark {
+  width:36px; height:36px;
+  background:linear-gradient(135deg,var(--indigo),var(--violet));
+  border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px;
+  box-shadow:0 0 20px rgba(124,108,255,.35);
+}
+.logo-text {
+  font-family:var(--font-head); font-weight:800; font-size:20px;
+  letter-spacing:-.5px;
+  background:linear-gradient(90deg,#fff 30%,var(--violet));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  display:block;
+}
+.logo-sub {
+  font-size:10px; font-family:var(--font-mono); color:var(--dim);
+  display:block; margin-top:1px;
+}
+
+.nav-section {
+  font-family:var(--font-mono); font-size:9px;
+  letter-spacing:2px; color:var(--dim);
+  text-transform:uppercase;
+  padding:18px 8px 6px;
+}
+
+.nav-btn {
+  display:flex; align-items:center; gap:10px;
+  width:100%; background:none; border:none;
+  color:var(--muted); padding:10px 10px;
+  border-radius:10px; cursor:pointer;
+  font-family:var(--font-body); font-size:13.5px; font-weight:500;
+  text-align:left; transition:all .2s; position:relative;
+}
+.nav-icon {
+  width:28px; height:28px; border-radius:7px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; background:var(--surface2); flex-shrink:0;
+  transition:all .2s;
+}
+.nav-btn:hover { color:var(--text); background:rgba(255,255,255,.04); }
+.nav-btn.active { color:#fff; background:rgba(124,108,255,.12); }
+.nav-btn.active .nav-icon {
+  background:linear-gradient(135deg,var(--indigo),var(--violet));
+  box-shadow:0 0 12px rgba(124,108,255,.4);
+}
+.nav-btn.active::before {
+  content:''; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:3px; height:18px; background:var(--indigo); border-radius:0 3px 3px 0;
+}
+.badge {
+  margin-left:auto; font-family:var(--font-mono); font-size:10px; font-weight:700;
+  padding:2px 7px; border-radius:999px;
+  background:var(--surface2); color:var(--muted); border:1px solid var(--border);
+}
+.nav-btn.active .badge {
+  background:rgba(124,108,255,.25); color:var(--violet);
+  border-color:rgba(124,108,255,.3);
+}
+
+/* ── MAIN ────────────────── */
+.main {
+  margin-left:var(--sidebar-w); flex:1;
+  padding:40px 36px;
+  position:relative; z-index:1;
+}
+
+/* ── HEADER ──────────────── */
+.header {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  margin-bottom:32px; gap:20px; flex-wrap:wrap;
+  animation: fadeUp .5s ease both;
+}
+.header h1 {
+  font-family:var(--font-head); font-size:30px; font-weight:800;
+  letter-spacing:-1px; line-height:1; margin-bottom:6px;
+}
+.header p { font-size:13px; color:var(--muted); font-family:var(--font-mono); }
+
+.search-wrap { position:relative; }
+.search-wrap svg {
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  color:var(--muted); pointer-events:none;
+}
+.search {
+  background:var(--surface); border:1px solid var(--border2);
+  padding:10px 14px 10px 36px; border-radius:10px;
+  color:var(--text); font-size:13px; font-family:var(--font-body);
+  width:230px; transition:.25s; outline:none;
+}
+.search:focus {
+  border-color:var(--indigo);
+  box-shadow:0 0 0 3px rgba(124,108,255,.12);
+  width:280px;
+}
+.search::placeholder { color:var(--dim); }
+
+/* ── STATS ───────────────── */
+.stats {
+  display:flex; gap:10px; margin-bottom:28px; flex-wrap:wrap;
+  animation: fadeUp .5s .07s ease both;
+}
+.stat {
+  display:flex; align-items:center; gap:8px;
+  padding:8px 14px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:999px; font-size:12px; color:var(--muted);
+  font-family:var(--font-mono); transition:.2s; cursor:default;
+}
+.stat:hover { border-color:var(--border2); color:var(--text); }
+.stat b { color:var(--text); font-size:13px; }
+.pip { width:6px; height:6px; border-radius:50%; }
+
+/* ── GRID ────────────────── */
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+  gap:16px;
+}
+
+/* ── CARD ────────────────── */
+.card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); padding:20px;
+  opacity:0; transform:translateY(12px);
+  transition:opacity .3s, transform .3s, box-shadow .25s, border-color .25s;
+  position:relative; overflow:hidden; cursor:default;
+}
+.card-glow {
+  position:absolute; top:-1px; left:20px; right:20px; height:1px;
+  background:linear-gradient(90deg,transparent,var(--c),transparent);
+  opacity:0; transition:opacity .3s;
+}
+.card::after {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,.03) 0%, transparent 60%);
+  pointer-events:none; opacity:0; transition:opacity .3s;
+}
+.card:hover::after { opacity:1; }
+.card.show { opacity:1; transform:translateY(0); }
+.card:hover {
+  border-color:rgba(255,255,255,.1);
+  box-shadow:0 20px 40px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04);
+  transform:translateY(-4px);
+}
+.card:hover .card-glow { opacity:1; }
+
+.card-top { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.cmd-icon {
+  width:38px; height:38px; border-radius:10px;
+  background:var(--surface2); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px; flex-shrink:0;
+}
+.cmd-name {
+  font-family:var(--font-mono); font-size:13.5px; font-weight:700;
+  color:#fff; flex:1; letter-spacing:-.3px;
+}
+.cat-pill {
+  font-size:9.5px; font-weight:700; font-family:var(--font-mono);
+  letter-spacing:1px; text-transform:uppercase;
+  padding:3px 9px; border-radius:999px;
+  background:color-mix(in srgb,var(--c) 12%,transparent);
+  color:var(--c);
+  border:1px solid color-mix(in srgb,var(--c) 25%,transparent);
+  white-space:nowrap;
+}
+
+.desc { font-size:12.5px; color:var(--muted); line-height:1.6; margin-bottom:12px; }
+
+.meta { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:13px; }
+.meta-tag {
+  font-size:11px; font-family:var(--font-mono);
+  padding:3px 8px; border-radius:6px;
+  background:var(--surface2); border:1px solid var(--border); color:var(--dim);
+}
+.meta-tag.perm-admin { color:#fb7185; border-color:rgba(251,113,133,.2); }
+.meta-tag.perm-mod   { color:#fbbf24; border-color:rgba(251,191,36,.2); }
+.meta-tag.perm-all   { color:#34d399; border-color:rgba(52,211,153,.2); }
+
+/* ── CODE BOX ────────────── */
+.codebox {
+  background:#07070e; border:1px solid var(--border);
+  border-radius:10px; position:relative; overflow:hidden;
+}
+.codebox-header {
+  display:flex; align-items:center; padding:8px 12px;
+  background:rgba(255,255,255,.02);
+  border-bottom:1px solid var(--border); gap:6px;
+}
+.codebox-dot { width:8px; height:8px; border-radius:50%; }
+.codebox-lang {
+  font-family:var(--font-mono); font-size:9.5px;
+  color:var(--dim); margin-left:2px; letter-spacing:.5px;
+}
+.copy-btn {
+  margin-left:auto; background:none;
+  border:1px solid var(--border); padding:3px 10px;
+  color:var(--dim); cursor:pointer; border-radius:6px;
+  font-size:10px; font-family:var(--font-mono); transition:.15s;
+}
+.copy-btn:hover { border-color:var(--indigo); color:var(--violet); }
+.copy-btn.ok    { border-color:#34d399; color:#34d399; }
+.codebox pre {
+  padding:12px 14px;
+  font-family:var(--font-mono); font-size:11px; color:#9090d0;
+  white-space:pre-wrap; word-break:break-all; line-height:1.7;
+  max-height:140px; overflow-y:auto;
+}
+.codebox pre::-webkit-scrollbar { width:3px; }
+.codebox pre::-webkit-scrollbar-thumb { background:var(--dim); border-radius:99px; }
+
+/* syntax */
+.t-kw  { color:#c678dd; }
+.t-str { color:#98c379; }
+.t-cm  { color:#5c637a; font-style:italic; }
+.t-num { color:#d19a66; }
+
+/* ── EMPTY ───────────────── */
+.empty {
+  grid-column:1/-1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:80px 20px; color:var(--dim); gap:10px;
+}
+.empty-icon { font-size:40px; opacity:.4; }
+.empty span { font-family:var(--font-mono); font-size:12px; letter-spacing:.5px; }
+
+/* ── VIEWER ──────────────── */
+.viewer {
+  background:#07070e; border:1px solid var(--border);
+  border-radius:var(--r); padding:24px;
+  font-family:var(--font-mono); font-size:11.5px; color:#7070b0;
+  white-space:pre; overflow:auto; max-height:70vh; line-height:1.7;
+}
+
+/* ── SCROLLBAR ───────────── */
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--dim); border-radius:99px; }
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">⚡</div>
+    <div>
+      <span class="logo-text">Xyrox</span>
+      <span class="logo-sub">v2.0 · 35 commands</span>
+    </div>
+  </div>
+
+  <div class="nav-section">Browse</div>
+  <button class="nav-btn active" onclick="tab('all',this)">
+    <span class="nav-icon">🗂️</span> All
+    <span class="badge" id="b-all">35</span>
+  </button>
+
+  <div class="nav-section">Categories</div>
+  <button class="nav-btn" onclick="tab('mod',this)">
+    <span class="nav-icon">⚔️</span> Moderation
+    <span class="badge" id="b-mod"></span>
+  </button>
+  <button class="nav-btn" onclick="tab('xp',this)">
+    <span class="nav-icon">📈</span> XP &amp; Levels
+    <span class="badge" id="b-xp"></span>
+  </button>
+  <button class="nav-btn" onclick="tab('eco',this)">
+    <span class="nav-icon">💰</span> Economy
+    <span class="badge" id="b-eco"></span>
+  </button>
+  <button class="nav-btn" onclick="tab('automod',this)">
+    <span class="nav-icon">🛡️</span> AutoMod
+    <span class="badge" id="b-automod"></span>
+  </button>
+  <button class="nav-btn" onclick="tab('setup',this)">
+    <span class="nav-icon">⚙️</span> Setup
+    <span class="badge" id="b-setup"></span>
+  </button>
+  <button class="nav-btn" onclick="tab('util',this)">
+    <span class="nav-icon">🔧</span> Utility
+    <span class="badge" id="b-util"></span>
+  </button>
+
+  <div class="nav-section">Source</div>
+  <button class="nav-btn" onclick="showCode()">
+    <span class="nav-icon">📄</span> bot.js
+  </button>
+</aside>
+
+<main class="main">
+  <div class="header">
+    <div>
+      <h1 id="title">All Commands</h1>
+      <p id="subtitle">35 commands · discord.js v14 · XyroxBot</p>
+    </div>
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="search" placeholder="Search commands…" oninput="search(this.value)" id="searchInput">
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="pip" style="background:var(--indigo)"></div><b>35</b>total</div>
+    <div class="stat"><div class="pip" style="background:var(--mod)"></div><b>9</b>mod</div>
+    <div class="stat"><div class="pip" style="background:var(--xp)"></div><b>4</b>xp</div>
+    <div class="stat"><div class="pip" style="background:var(--eco)"></div><b>8</b>economy</div>
+    <div class="stat"><div class="pip" style="background:var(--automod)"></div><b>17</b>automod</div>
+    <div class="stat"><div class="pip" style="background:var(--util)"></div><b>3</b>utility</div>
+  </div>
+
+  <div id="grid" class="grid"></div>
+  <div id="viewer" class="viewer" style="display:none"></div>
+</main>
+
+<script>
+const commands = [
+  {cat:'mod',icon:'👢',name:'/kick',perm:'kick',
+   desc:'Kick a member from the server. Sends a DM with the reason before removing them.',
+   args:'user*, reason',
+   code:`const member = await guild.members.fetch(targetUser.id);\nawait member.send(\`👢 Kicked from \${guild.name}\\nReason: \${reason}\`);\nawait member.kick(reason);`},
+  {cat:'mod',icon:'🔨',name:'/ban',perm:'ban',
+   desc:'Permanently ban a member. DMs the user first with the reason provided.',
+   args:'user*, reason',
+   code:`await guild.members.ban(targetUser.id, {\n  reason,\n  deleteMessageSeconds: 0\n});`},
+  {cat:'mod',icon:'⚠️',name:'/warn',perm:'mod',
+   desc:'Issue a formal warning stored per-guild. Warns stack and are viewable with /warnings.',
+   args:'user*, reason*',
+   code:`warnings[guild.id][user.id].push({\n  reason, moderator, date: new Date().toISOString()\n});\nsaveData();`},
+  {cat:'mod',icon:'📋',name:'/warnings',perm:'mod',
+   desc:'View all logged warnings for a user with reason, moderator name, and date of each.',
+   args:'user*',
+   code:`const userWarns = warnings[guild.id]?.[targetUser.id];\n// Returns embed: each warn shows reason, by mod, date`},
+  {cat:'mod',icon:'🧹',name:'/clearwarnings',perm:'admin',
+   desc:'Clear all warnings for a user completely. Admin only.',
+   args:'user*',
+   code:`warnings[guild.id][targetUser.id] = [];\nsaveData();`},
+  {cat:'mod',icon:'🔇',name:'/mute',perm:'mod',
+   desc:"Timeout a member via Discord's native timeout. Duration 1 minute to 28 days.",
+   args:'user*, minutes*(1–40320), reason',
+   code:`await targetMember.timeout(minutes * 60_000, reason);\n// DMs user: muted for {minutes}min, reason: {reason}`},
+  {cat:'mod',icon:'🔊',name:'/unmute',perm:'mod',
+   desc:'Remove an active timeout from a member immediately. DMs them on removal.',
+   args:'user*',
+   code:`await targetMember.timeout(null);\n// null = removes timeout immediately`},
+  {cat:'mod',icon:'📢',name:'/announce',perm:'mod',
+   desc:'Send a formatted announcement embed to the current channel with your tag as author.',
+   args:'message*',
+   code:`await interaction.channel.send({ embeds: [\n  new EmbedBuilder().setTitle('📢 Announcement')\n    .setDescription(message)\n    .setFooter({ text: \`By \${user.tag}\` })\n    .setTimestamp()\n]});`},
+  {cat:'mod',icon:'🗑️',name:'/clear',perm:'mod',
+   desc:'Bulk-delete 1–100 messages. Skips messages older than 14 days automatically.',
+   args:'amount*(1–100)',
+   code:`const deleted = await channel.bulkDelete(amount, true);\n// true = filter messages older than 14 days`},
+
+  {cat:'xp',icon:'📊',name:'/level',perm:'all',
+   desc:'Check your current level, XP earned, and progress toward the next level.',
+   args:'user',
+   code:`const d = levels[guild.id][user.id];\n// d = { xp: number, level: number }\n// Next level threshold: d.level * 100`},
+  {cat:'xp',icon:'➕',name:'/addxp',perm:'admin',
+   desc:'Manually add XP to a member. Auto-applies level-up logic, notifies on level gain.',
+   args:'user*, amount*(>0)',
+   code:`const leveled = addXP(guild.id, target.id, amount);\n// addXP: xp += amount; if xp >= level*100 → level++`},
+  {cat:'xp',icon:'➖',name:'/removexp',perm:'admin',
+   desc:'Remove XP from a member. Handles level-down if XP drops below zero.',
+   args:'user*, amount*(>0)',
+   code:`u.xp -= amount;\nwhile (u.xp < 0 && u.level > 1) {\n  u.level--; u.xp += u.level * 100;\n}\nif (u.xp < 0) u.xp = 0;`},
+  {cat:'xp',icon:'🏆',name:'/leaderboard',perm:'all',
+   desc:'Display the top 10 members by XP with a paginated embed and navigation buttons.',
+   args:'none',
+   code:`const { embed, row } = await buildLeaderboard(guild, 'xp');\ninteraction.reply({ embeds: [embed], components: [row] });`},
+
+  {cat:'eco',icon:'💰',name:'/cash',perm:'all',
+   desc:"Check your wallet balance or view another user's current cash.",
+   args:'user',
+   code:`// economy[userId] = { cash, lastDaily, inventory[] }\nreturn \`💰 \${target.tag} has $\${economy[target.id].cash}\``},
+  {cat:'eco',icon:'🎁',name:'/daily',perm:'all',
+   desc:'Claim a daily cash reward of $100–$600. 24-hour cooldown per user.',
+   args:'none',
+   code:`const reward = Math.floor(Math.random() * 500) + 100;\neconomy[user.id].cash += reward;\neconomy[user.id].lastDaily = Date.now();`},
+  {cat:'eco',icon:'💸',name:'/give',perm:'all',
+   desc:'Transfer cash from your wallet to another user. Cannot give to yourself.',
+   args:'user*, amount*(>0)',
+   code:`economy[sender.id].cash -= amount;\neconomy[target.id].cash += amount;\nsaveEconomy();`},
+  {cat:'eco',icon:'🎣',name:'/fish',perm:'all',
+   desc:'Go fishing to earn $50–$350 in random cash added to your balance.',
+   args:'none',
+   code:`const gain = Math.floor(Math.random() * 300) + 50;\neconomy[user.id].cash += gain;`},
+  {cat:'eco',icon:'🦹',name:'/rob',perm:'all',
+   desc:"50% chance to steal up to half a target's cash. Failure deducts $10–$110 from you.",
+   args:'user*',
+   code:`if (Math.random() < 0.5) {\n  const stolen = Math.floor(Math.random() * (target.cash / 2)) + 1;\n  target.cash -= stolen; robber.cash += stolen;\n} else {\n  robber.cash -= Math.floor(Math.random() * 100) + 10;\n}`},
+  {cat:'eco',icon:'🎰',name:'/gamble',perm:'all',
+   desc:'Bet a specific amount. 50/50 to double it or lose it completely.',
+   args:'amount*(>0)',
+   code:`if (Math.random() < 0.5) {\n  economy[user.id].cash += amount; // WIN\n} else {\n  economy[user.id].cash -= amount; // LOSE\n}`},
+  {cat:'eco',icon:'🛒',name:'/shop',perm:'all',
+   desc:'Browse all purchasable items with prices and descriptions.',
+   args:'none',
+   code:`// shop = { 'VIP Role': { price: 1000, desc: '...' } }\nfor (const item in shop)\n  desc += \`**\${item}** — $\${shop[item].price}\\n\`;`},
+  {cat:'eco',icon:'🛍️',name:'/buy',perm:'all',
+   desc:'Purchase a shop item. Deducts price and adds it to your inventory.',
+   args:'item*(name string)',
+   code:`economy[user.id].cash -= shop[item].price;\neconomy[user.id].inventory.push(item);\nsaveEconomy();`},
+
+  {cat:'automod',icon:'📊',name:'/automod dashboard',perm:'admin',
+   desc:'Full status dashboard — all 5 rules, their state, log channel, and current exemptions.',
+   args:'none',
+   code:`const embed = await buildStatusEmbed(guild);\n// Per rule: ✅ Active / ⏸️ Paused / ❌ Not setup\n// + log channel, exempt roles & channels`},
+  {cat:'automod',icon:'🚀',name:'/automod setup',perm:'admin',
+   desc:'Create all 5 AutoMod rules at once: Keyword Filter, Invites, Spam, Mentions, Harmful Content.',
+   args:'none',
+   code:`for (const key of Object.keys(RULE_DEFS)) {\n  const existing = await findRule(guild, key);\n  if (!existing) await createRule(guild, key);\n}`},
+  {cat:'automod',icon:'✅',name:'/automod enable',perm:'admin',
+   desc:'Enable a specific AutoMod rule. Creates it from scratch if not yet set up.',
+   args:'rule*(keyword|invites|spam|mentions|harmful)',
+   code:`const rule = await findRule(guild, key);\nif (!rule) await createRule(guild, key);\nelse await rule.edit({ enabled: true });`},
+  {cat:'automod',icon:'⏸️',name:'/automod pause',perm:'admin',
+   desc:'Temporarily disable a rule without deleting it. Re-enable with /automod enable.',
+   args:'rule*(keyword|invites|spam|mentions|harmful)',
+   code:`const rule = await findRule(guild, key);\nawait rule.edit({ enabled: false });`},
+  {cat:'automod',icon:'🗑️',name:'/automod disable',perm:'admin',
+   desc:'Delete all bot-created AutoMod rules from this server entirely.',
+   args:'none',
+   code:`const rules = await fetchBotRules(guild);\nfor (const [, r] of rules) await r.delete();`},
+  {cat:'automod',icon:'🚫',name:'/automod addword',perm:'admin',
+   desc:'Add a custom blocked keyword or phrase to the Keyword Filter rule.',
+   args:'word*',
+   code:`const kw = [...rule.triggerMetadata.keywordFilter];\nkw.push(word);\nawait rule.edit({ triggerMetadata: { keywordFilter: kw } });`},
+  {cat:'automod',icon:'♻️',name:'/automod removeword',perm:'admin',
+   desc:'Remove a blocked keyword from the Keyword Filter.',
+   args:'word*',
+   code:`const kw = rule.triggerMetadata.keywordFilter\n  .filter(w => w !== word);\nawait rule.edit({ triggerMetadata: { keywordFilter: kw } });`},
+  {cat:'automod',icon:'📋',name:'/automod listwords',perm:'admin',
+   desc:'List all currently blocked keywords and regex patterns.',
+   args:'none',
+   code:`const kw = rule.triggerMetadata.keywordFilter;  // string[]\nconst re = rule.triggerMetadata.regexPatterns; // string[]`},
+  {cat:'automod',icon:'🔣',name:'/automod addregex',perm:'admin',
+   desc:'Add a regex pattern to the Keyword Filter. Max 10 patterns (Discord limit).',
+   args:'pattern*(valid regex)',
+   code:`new RegExp(pattern); // validate first\nre.push(pattern);\nawait rule.edit({ triggerMetadata: { ..., regexPatterns: re } });`},
+  {cat:'automod',icon:'❌',name:'/automod removeregex',perm:'admin',
+   desc:'Remove a regex pattern from the Keyword Filter.',
+   args:'pattern*',
+   code:`const re = rule.triggerMetadata.regexPatterns\n  .filter(p => p !== pattern);\nawait rule.edit({ triggerMetadata: { ..., regexPatterns: re } });`},
+  {cat:'automod',icon:'🔔',name:'/automod mentionlimit',perm:'admin',
+   desc:'Set max @mentions per message before AutoMod blocks it and mutes the sender for 5 min.',
+   args:'limit*(2–50)',
+   code:`await rule.edit({ triggerMetadata: {\n  mentionTotalLimit: limit,\n  mentionRaidProtectionEnabled: true\n}});`},
+  {cat:'automod',icon:'📝',name:'/automod setlog',perm:'admin',
+   desc:'Set a channel to receive all AutoMod alerts. Updates all existing rules instantly.',
+   args:'channel*',
+   code:`cfg.logChannel = channel.id;\nawait updateAllLogChannels(guild, channel.id);\n// Injects SendAlertMessage action into every rule`},
+  {cat:'automod',icon:'🗑️',name:'/automod removelog',perm:'admin',
+   desc:'Remove the log channel. Strips alert actions from all rules.',
+   args:'none',
+   code:`cfg.logChannel = null;\nawait updateAllLogChannels(guild, null);`},
+  {cat:'automod',icon:'🔓',name:'/automod exemptrole',perm:'admin',
+   desc:'Exempt a role from all AutoMod rules (e.g. staff). Applies immediately.',
+   args:'role*',
+   code:`cfg.exemptRoles.push(role.id);\nawait updateAllRuleExemptions(guild);`},
+  {cat:'automod',icon:'🔒',name:'/automod unexemptrole',perm:'admin',
+   desc:'Remove a role exemption so they are subject to AutoMod filters again.',
+   args:'role*',
+   code:`cfg.exemptRoles = cfg.exemptRoles.filter(id => id !== role.id);\nawait updateAllRuleExemptions(guild);`},
+  {cat:'automod',icon:'📵',name:'/automod exemptchannel',perm:'admin',
+   desc:'Exempt a channel from all AutoMod rules.',
+   args:'channel*',
+   code:`cfg.exemptChannels.push(ch.id);\nawait updateAllRuleExemptions(guild);`},
+  {cat:'automod',icon:'📶',name:'/automod unexemptchannel',perm:'admin',
+   desc:'Remove a channel exemption from AutoMod filters.',
+   args:'channel*',
+   code:`cfg.exemptChannels = cfg.exemptChannels.filter(id => id !== ch.id);\nawait updateAllRuleExemptions(guild);`},
+
+  {cat:'setup',icon:'👋',name:'/setwelcome',perm:'admin',
+   desc:'Set the channel where welcome messages are sent when new members join.',
+   args:'channel*',
+   code:`welcomeChannels[guild.id] = channel.id;\nsaveData();`},
+  {cat:'setup',icon:'🏷️',name:'/setautorole',perm:'admin',
+   desc:'Set a role to be auto-assigned to every new member who joins.',
+   args:'role*',
+   code:`autoRoles[guild.id] = role.id;\nsaveData();`},
+  {cat:'setup',icon:'📡',name:'/setxpchannel',perm:'admin',
+   desc:'Set the channel where level-up notifications are announced.',
+   args:'channel*',
+   code:`xpChannels[guild.id] = channel.id;\nsaveData();`},
+
+  {cat:'util',icon:'💬',name:'/help',perm:'all',
+   desc:'Display all commands in a categorized embed. Shows AutoMod status if rules are active.',
+   args:'none',
+   code:`interaction.reply({ embeds: [\n  new EmbedBuilder().setTitle('🤖 Bot Commands')\n    .addFields( /* per-category field list */ )\n    .setFooter({ text: automod ? '🛡️ AutoMod active' : 'Setup with /automod setup' })\n]})`},
+  {cat:'util',icon:'🏓',name:'/ping',perm:'all',
+   desc:"Check the bot's current WebSocket response latency in milliseconds.",
+   args:'none',
+   code:`const msg = await interaction.reply({ content: 'Pinging…', fetchReply: true });\ninteraction.editReply(\`🏓 Pong! Latency: \${msg.createdTimestamp - interaction.createdTimestamp}ms\`);`},
+  {cat:'util',icon:'💤',name:'/afk',perm:'all',
+   desc:'Mark yourself as AFK. Bot notifies anyone who mentions you until you send a message.',
+   args:'reason',
+   code:`afkData[interaction.user.id] = reason;\nsaveData();\n// On messageCreate: if mentioned user is AFK → bot replies with their reason`},
+];
+
+const catColors = {
+  mod:'var(--mod)',xp:'var(--xp)',eco:'var(--eco)',
+  automod:'var(--automod)',setup:'var(--setup)',util:'var(--util)'
+};
+const catLabels = {
+  mod:'Moderation',xp:'XP & Levels',eco:'Economy',
+  automod:'AutoMod',setup:'Setup',util:'Utility'
+};
+const permLabel = {kick:'Kick Perm',ban:'Ban Perm',mod:'Moderator',admin:'Admin',all:'Everyone'};
+const permCls   = {kick:'perm-mod',ban:'perm-mod',mod:'perm-mod',admin:'perm-admin',all:'perm-all'};
+
+function esc(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function highlight(code){
+  return esc(code)
+    .replace(/\b(const|let|if|else|for|of|return|await|async|new|true|false|null)\b/g,'<span class="t-kw">$1</span>')
+    .replace(/(\/\/[^\n]*)/g,'<span class="t-cm">$1</span>')
+    .replace(/(`[^`\n]*`)/g,'<span class="t-str">$1</span>')
+    .replace(/('[^'\n]*')/g,'<span class="t-str">$1</span>')
+    .replace(/\b(\d[\d_]*)\b/g,'<span class="t-num">$1</span>');
+}
+
+function render(list){
+  const grid = document.getElementById('grid');
+  const viewer = document.getElementById('viewer');
+  grid.innerHTML = '';
+  viewer.style.display = 'none';
+  if(!list.length){
+    grid.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><span>no commands match your search</span></div>';
+    return;
+  }
+  list.forEach((c,i)=>{
+    const color = catColors[c.cat]||'var(--indigo)';
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.style.cssText = `--c:${color};transition-delay:${(i%16)*30}ms`;
+    el.innerHTML = `
+      <div class="card-glow"></div>
+      <div class="card-top">
+        <div class="cmd-icon">${c.icon}</div>
+        <code class="cmd-name">${c.name}</code>
+        <span class="cat-pill">${catLabels[c.cat]}</span>
+      </div>
+      <div class="desc">${c.desc}</div>
+      <div class="meta">
+        <span class="meta-tag ${permCls[c.perm]||'perm-all'}">🔑 ${permLabel[c.perm]||'Everyone'}</span>
+        ${c.args&&c.args!=='none'?`<span class="meta-tag">📥 ${c.args}</span>`:''}
+      </div>
+      <div class="codebox">
+        <div class="codebox-header">
+          <div class="codebox-dot" style="background:#ff5f57"></div>
+          <div class="codebox-dot" style="background:#febc2e"></div>
+          <div class="codebox-dot" style="background:#28c840"></div>
+          <span class="codebox-lang">javascript</span>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre>${highlight(c.code)}</pre>
+      </div>`;
+    el.addEventListener('mousemove',e=>{
+      const r=el.getBoundingClientRect();
+      el.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
+      el.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
+    });
+    grid.appendChild(el);
+    requestAnimationFrame(()=>setTimeout(()=>el.classList.add('show'),10));
+  });
+}
+
+function copyCode(btn){
+  const text = btn.closest('.codebox').querySelector('pre').innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='✓ copied'; btn.classList.add('ok');
+    setTimeout(()=>{btn.textContent='copy';btn.classList.remove('ok');},1600);
+  });
+}
+
+function tab(cat,btn){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('searchInput').value='';
+  const list=cat==='all'?commands:commands.filter(c=>c.cat===cat);
+  document.getElementById('title').textContent=
+    cat==='all'?'All Commands':(catLabels[cat]||cat)+' Commands';
+  document.getElementById('subtitle').textContent=
+    `${list.length} command${list.length!==1?'s':''} · discord.js v14 · XyroxBot`;
+  render(list);
+}
+
+function search(q){
+  const lq=q.toLowerCase().trim();
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const list=lq?commands.filter(c=>
+    c.name.toLowerCase().includes(lq)||c.desc.toLowerCase().includes(lq)
+  ):commands;
+  document.getElementById('title').textContent=lq?`Results for "${q}"`:'All Commands';
+  document.getElementById('subtitle').textContent=`${list.length} match${list.length!==1?'es':''}`;
+  render(list);
+}
+
+async function showCode(){
+  document.getElementById('grid').innerHTML='';
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('title').textContent='Source — bot.js';
+  document.getElementById('subtitle').textContent='Full annotated source file';
+  const viewer=document.getElementById('viewer');
+  viewer.style.display='block';
+  viewer.textContent='// Loading bot.js…';
+  try{
+    const res=await fetch('bot.js');
+    if(!res.ok) throw new Error();
+    viewer.textContent=await res.text();
+  }catch{
+    viewer.textContent='// ❌ Could not load bot.js\n// Serve via a local server (e.g. Live Server in VS Code)';
+  }
+}
+
+function updateBadges(){
+  document.getElementById('b-all').textContent=commands.length;
+  for(const cat of Object.keys(catLabels)){
+    const el=document.getElementById('b-'+cat);
+    if(el) el.textContent=commands.filter(c=>c.cat===cat).length;
+  }
+}
+
+updateBadges();
+render(commands);
+</script>
+</body>
+</html>
